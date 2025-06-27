@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+src/UNKNOWN.egg-info/PKG-INFO
+src/UNKNOWN.egg-info/SOURCES.txt
+src/UNKNOWN.egg-info/dependency_links.txt
+src/UNKNOWN.egg-info/top_level.txt
+src/application/pessoas_service.py
+src/core/pessoas/entity.py
+src/core/pessoas/model.py
+src/infrastructure/auth/jwt_utils.py
+src/infrastructure/db/session.py
+src/infrastructure/db/repositories/pessoas.py
+src/presentation/pessoas_router.py
+src/presentation/schemas/pessoas.py
+tests/test_migrations.py
