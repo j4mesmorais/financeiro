@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  api:
+    image: mcp_api:1.0
+    container_name: mcp_api
+    restart: always
+
+    volumes:
+
+      - mcp_data:/app/data
+
+    environment:
+      DATABASE_URL="postgresql://postgres:Adjunto7411135@localhost:5432/financeiro"
+      JWT_SECRET="your_jwt_secret"
+
+
+    labels:
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_public"
+      - "traefik.http.routers.mcp_api.rule=Host(`mcpfinanceiro.adjunto.com.br`)"
+      - "traefik.http.routers.mcp_api.entrypoints=websecure"
+      - "traefik.http.routers.mcp_api.priority=1"
+      - "traefik.http.routers.mcp_api.tls.certresolver=le"
+      - "traefik.http.routers.mcp_api.middlewares=mcp_api-security"
+      - "traefik.http.middlewares.mcp_api-security.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.mcp_api-security.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.mcp_api-security.headers.stsPreload=true"
+      - "traefik.http.middlewares.mcp_api-security.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.mcp_api-security.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.mcp_api-security.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.mcp_api-security.headers.frameDeny=true"
+
+
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.5'
+
+    networks:
+      - traefik_public
+      - agent_network
+
+volumes:
+  mcp_data:
+    driver: local
+
+networks:
+  traefik_public:
+    external: true
+  agent_network:
+    external: true
