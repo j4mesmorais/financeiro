@@ -40,12 +40,23 @@ def decode_access_token(token: str) -> Dict[str, Any]:
     email = payload.get("email")
     is_superuser = payload.get("isSuperUser")
 
+    # Validate that all required fields are present and not None
     if user_id is None or email is None or is_superuser is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token inválido")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token inválido: campos obrigatórios ausentes")
+
+    # Validate field types and values
+    if not isinstance(user_id, int) or user_id <= 0:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token inválido: ID do usuário deve ser um inteiro positivo")
+    
+    if not isinstance(email, str) or len(email.strip()) == 0 or "@" not in email:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token inválido: email deve ser uma string válida")
+    
+    if not isinstance(is_superuser, bool):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token inválido: isSuperUser deve ser um booleano")
 
     return {
         "id": user_id,
-        "email": email,
+        "email": email.strip().lower(),  # Normalize email
         "is_superuser": is_superuser
     }
 

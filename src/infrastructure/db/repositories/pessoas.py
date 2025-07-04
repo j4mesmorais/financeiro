@@ -37,23 +37,36 @@ class PessoaRepository:
         return result.scalars().all()
 
     async def update(self, pessoa_id: int, pessoa: Pessoa) -> Optional[PessoaModel]:
-        db_pessoa = await self.get_by_id(pessoa_id)
-        if not db_pessoa:
-            return None
-        # Atualiza apenas campos não None
+        # Build update values dict, excluding None values
+        update_values = {}
         for attr in ("nome", "celular", "cpf", "data_nascimento", "flag"):
             val = getattr(pessoa, attr)
             if val is not None:
-                setattr(db_pessoa, attr, val)
-        self.session.add(db_pessoa)
+                update_values[attr] = val
+        
+        if not update_values:
+            # No values to update, return existing record
+            return await self.get_by_id(pessoa_id)
+        
+        # Perform direct update query
+        from sqlalchemy import update
+        stmt = update(PessoaModel).where(PessoaModel.id == pessoa_id).values(**update_values)
+        result = await self.session.execute(stmt)
+        
+        if result.rowcount == 0:
+            # No rows affected, record doesn't exist
+            return None
+            
         await self.session.commit()
-        await self.session.refresh(db_pessoa)
-        return db_pessoa
+        # Return updated record
+        return await self.get_by_id(pessoa_id)
 
     async def delete(self, pessoa_id: int) -> bool:
-        db_pessoa = await self.get_by_id(pessoa_id)
-        if not db_pessoa:
-            return False
-        await self.session.delete(db_pessoa)
+        # Perform direct delete query
+        from sqlalchemy import delete
+        stmt = delete(PessoaModel).where(PessoaModel.id == pessoa_id)
+        result = await self.session.execute(stmt)
         await self.session.commit()
-        return True
+        
+        # Return True if a row was actually deleted
+        return result.rowcount > 0

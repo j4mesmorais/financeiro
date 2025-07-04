@@ -12,12 +12,11 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# Inclui o router de Pessoas com autenticação e sessão de DB
+# Inclui o router de Pessoas (dependencies handled at endpoint level)
 app.include_router(
     pessoas_router,
     #prefix="/pessoas",
     tags=["Pessoas"],
-    dependencies=[Depends(get_current_user), Depends(get_session)],
 )
 
 # Registra o MCP server em /mcp
